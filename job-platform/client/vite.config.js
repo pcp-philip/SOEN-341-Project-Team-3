@@ -9,4 +9,4 @@ export default defineConfig({
             "/uploads": "http://localhost:5000",
         },
     },
-});
+});dq3w ed3qwr wa3 rwq fas fw fsa
