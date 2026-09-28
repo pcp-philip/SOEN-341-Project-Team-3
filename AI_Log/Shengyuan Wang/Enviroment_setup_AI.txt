@@ -6,7 +6,7 @@ Chat Link or Prompt/Response: https://chat.deepseek.com/share/twtfckw8wlitmoowjf
  
 AI-Suggested Content: Generates a step by step guide to set up the preferred environment for the developers to follow and use.
 
-Validation: 
+Validation: Following the guide the enviroment was built successfully, the client was able to to connect with the server. 
 
 Decision: Modified before use. 
 
