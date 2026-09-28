@@ -6,7 +6,7 @@ Chat Link or Prompt/Response: https://chat.deepseek.com/share/hjk1o7mit67gs50h5f
  
 AI-Suggested Content: Generate the frontend and the back end code for the registration page, sign in page and the upload document page. 
 
-Validation: 
+Validation: The code was correctly generated, all the pages created was functioning as what we expected. 
 
 Decision: Modified before use.
 
