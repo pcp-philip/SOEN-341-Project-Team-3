@@ -1,0 +1,11 @@
+Samuel Pineau
+40317711
+
+Purpose: Learn how to make the database for the website available to anyone with the link, accessible over the internet 
+
+Usage: Gain setp by step method for setting up a backend and front end online (start of ai log)
+
+  Next used claude to help debug the problem with database connections (turns out i forgot to sync the fork that connects to netlify)
+
+link: https://claude.ai/share/786881c9-e082-40b2-99c0-e4ae96ebfa0c 
+
