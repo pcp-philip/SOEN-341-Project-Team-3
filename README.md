@@ -15,9 +15,12 @@ This is a web-based Job Search and Application Tracking Platform designed to hel
 Backend : Express.js 
 Frontend : React.js
 
-
 # Website
 
 Link: https://dreamy-stroopwafel-ddde76.netlify.app
 
 Login with email and password, become either a recruiter or an applicant
+
+Database: MongoDB
+Frontend: Netlify
+Backend: Render
