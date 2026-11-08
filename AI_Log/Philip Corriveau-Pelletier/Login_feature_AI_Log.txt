@@ -1,3 +1,42 @@
+Task ID/Title: 
+	Fix automatic logout issues when closing browser
+
+Purpose of AI Use: 
+	Write the code to implement the new feature
+
+Chat Link or Prompt/Response: 
+
+	See below
+
+AI-Suggested Content: 
+	Add a feature to offer the user to stay logged in for this device.  Force logout with browser closing to avoid duplicated logins.
+
+Validation: 
+	Testing the new features and will implement.
+
+Decision: Indicate whether the AI output was:
+	Accepted
+
+Reflection: 
+	AI useful in speeding up the process but further testing is required to validate the features are working as intended in all cases.
+
+Responsible Person: 
+	Philip
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 User: add a feature thats lets users choose to stay logged on this device after logging in
 
 Copilot: I’ll trace the current login/session flow across the client and server, then add a “stay logged in” option that uses the app’s existing authentication patterns.
