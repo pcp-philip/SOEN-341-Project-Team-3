@@ -1,0 +1,103 @@
+User: add a feature thats lets users choose to stay logged on this device after logging in
+
+Copilot: I’ll trace the current login/session flow across the client and server, then add a “stay logged in” option that uses the app’s existing authentication patterns.
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\client\\src\\pages\\Login.jsx"
+}
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\client\\src\\context\\AuthContext.jsx"
+}
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\server\\controllers\\authController.js"
+}
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\server\\routes\\authRoutes.js"
+}
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\client\\src\\api\\axios.js"
+}
+
+Ran terminal command: git status --short; Get-Content job-platform\client\package.json; Get-Content job-platform\server\package.json
+
+Search for `localStorage|sessionStorage|\.login\(`
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\client\\src\\pages\\Register.jsx"
+}
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\client\\src\\components\\ProtectedRoute.jsx"
+}
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\client\\src\\App.jsx"
+}
+
+Read 
+Completed with input: {
+  "path": "C:\\Users\\Phili\\SOEN_341_Project\\SOEN-341-Project-Team-3\\job-platform\\client\\README.md"
+}
+
+The app currently stores every login in `localStorage`, so sessions survive browser restarts by default. I’m changing login to offer an opt-in persistent session while keeping unchecked sessions in `sessionStorage`; existing registration behavior remains unchanged.
+
+Edit , , 
+
+Ran terminal command: npm run lint
+
+Ran terminal command: npm run build
+
+User: we also want users to be logged out when they close the broswer they used to log in
+
+Copilot: Ask User
+Completed with input: {
+  "message": "Should the “Stay logged in on this device” option override automatic logout on browser close, or should every login end when the browser closes?",
+  "requestedSchema": {
+    "properties": {
+      "browserCloseBehavior": {
+        "type": "string",
+        "title": "Browser-close behavior",
+        "description": "Choose how the login option should interact with closing the browser.",
+        "oneOf": [
+          {
+            "const": "option-controls",
+            "title": "Only stay logged in if checked; unchecked users are logged out when the browser closes"
+          },
+          {
+            "const": "always-logout",
+            "title": "Always log users out when the browser closes, even if the option is checked"
+          }
+        ],
+        "default": "option-controls"
+      }
+    }
+  }
+}
+
+Ran terminal command: git status --short; git diff -- job-platform\client\src\pages\Login.jsx job-platform\client\src\context\AuthContext.jsx job-platform\client\src\api\axios.js; npm run lint --prefix job-platform\client; $lintExit = $LASTEXITCODE; npm run build --prefix job-platform\client; $buildExit = $LASTEXITCODE; Write-Output "lint exit: $lintExit; build exit: $buildExit"; if ($lintExit -ne 0 -or $buildExit -ne 0) { exit 1 }
+
+Ran terminal command: git diff --check; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; Get-Command node,npm,pnpm,yarn -ErrorAction SilentlyContinue | Select-Object Name,Source
+
+I’ve confirmed the selected behavior: checked means persist across browser restarts; unchecked means the session ends with the browser session. I’m aligning registration’s automatic sign-in with that temporary-by-default behavior too, then I’ll finish the available checks.
+
+Edit 
+
+Ran terminal command: git diff --check; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git status --short; Get-Command node,npm,pnpm,yarn -ErrorAction SilentlyContinue | Select-Object Name,Source
+
+Added a **“Stay logged in on this device”** checkbox to `Login.jsx`.
+
+When unchecked (the default), login uses `sessionStorage`, so the session ends when the browser session closes. When checked, it uses `localStorage` and persists across browser restarts. Registration’s automatic sign-in also defaults to a temporary session. Both storage types are cleared on logout or when an invalid token is detected in `AuthContext.jsx` and `axios.js`.
+
+`git diff --check` passed. I couldn’t run the client lint or build because Node.js/npm aren’t available in the environment.
