@@ -1,0 +1,271 @@
+Task ID/Title: 
+	Stay logged in feature, passwrod reset, show password
+
+Purpose of AI Use: 
+	Help write the code
+Chat Link or Prompt/Response: 
+
+	see below
+
+AI-Suggested Content: 
+	Updated the project with the new code
+
+Validation: 
+Tested the new features to validate they work.
+
+Decision: Indicate whether the AI output was:
+	Accepted
+
+Reflection: 
+	Ai was helpful
+
+Responsible Person: 
+	Philip
+
+
+
+
+
+User: does a user have the "stay logged in on this device" for this project?
+
+GitHub Copilot: Searched for regex `remember|stay logged in|localStorage|sessionStorage|token` (`**/job-platform/client/src/**`), 21 results
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/context/AuthContext.jsx)
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/api/axios.js)
+
+Not as a separate “stay logged in on this device” option.
+
+From the app code:
+- The auth token is saved to `localStorage` in AuthContext.jsx when the user logs in.
+- On page reload, it reads that token back from `localStorage` to keep the session active.
+- There is no checkbox or “remember me” UI in the login form.
+
+So the behavior is effectively:
+- Yes, the user stays logged in on that browser/device until they log out or the token is removed.
+- No, there is not a user-controlled “stay signed in” toggle.
+
+Relevant code:
+- AuthContext.jsx
+- axios.js
+
+If you want, I can also point out the exact lines or help add a real “Remember me” checkbox.
+
+User: add a real "Remember me" checkbox that will keep the user logged in on that device 
+
+GitHub Copilot: Created 3 todos
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/Login.jsx)
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/Register.jsx)
+
+
+
+
+
+
+````
+
+````
+
+
+
+
+
+
+
+````
+
+````
+
+
+
+
+
+
+
+````
+
+````
+I’ve added the checkbox and persisted the session according to it. I’m checking the client build now to make sure it still compiles cleanly.
+
+Ran terminal command: cd "c:\Users\p_corri\Soen_341\SOEN-341-Project-Team-3\job-platform\client" ; npm run build
+
+Checked [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/Login.jsx), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/Register.jsx), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/context/AuthContext.jsx), no problems found
+
+Added a real “Remember me on this device” checkbox.
+
+What changed:
+- Login form now includes a checkbox.
+- Register form also includes the same option.
+- The app stores the token in:
+  - `localStorage` when checked
+  - `sessionStorage` when not checked
+- Logout clears both storage locations.
+
+Files updated:
+- Login.jsx
+- Register.jsx
+- AuthContext.jsx
+
+Note:
+- I attempted a frontend build check, but this environment does not currently have `npm` available, so I validated the edited files with the editor diagnostics instead. They show no JSX/JS errors.
+
+If you want, I can also add a small “Forgot password” or “Show password” toggle next.
+
+Made changes.
+
+User: yes add both “Forgot password” and “Show password” toggle next.
+
+GitHub Copilot: Starting: *Add forgot-password and show-password UX* (3/4)
+
+Searched for text `forgot password|Forgot password|reset password|/forgot|/reset` (`**/job-platform/**`), no results
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/App.jsx)
+
+Searched for regex `BrowserRouter|Routes|Route|forgot-password|reset-password` (`**/job-platform/client/src/**`), 26 results
+
+I’m adding the login UX improvements now: a working “show password” toggle and a placeholder “Forgot password?” action that informs the user the reset flow isn’t implemented yet.
+
+
+
+
+
+
+````
+
+````
+
+
+Checked [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/Login.jsx), no problems found
+
+Done — the login form now includes:
+- “Show” / “Hide” password toggle
+- “Forgot password?” link/button
+- “Remember me” checkbox already added earlier
+
+The forgot-password action currently shows a message instead of sending a reset email, since there’s no password-reset backend flow in this project yet.
+
+If you want, I can next add a proper reset-password page and API route as a full feature.
+
+Made changes.
+
+User:  add a proper reset-password page and API route as a full feature.
+
+GitHub Copilot: Searched for regex `login|register|auth/me|router.post\("/login|router.post\("/register|reset` (`**/job-platform/server/**`), 9 results
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/server/controllers/authController.js)
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/server/routes/authRoutes.js)
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/server/models/User.js)
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/server/server.js)
+
+Starting: *Implement reset-password API + pages* (4/5)
+
+
+
+
+
+
+````
+
+````
+
+
+
+
+
+
+
+````
+
+````
+
+
+
+
+
+
+
+````
+
+````
+
+
+Created [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/ForgotPassword.jsx)
+
+Created [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/ResetPassword.jsx)
+
+
+
+
+
+
+````
+
+````
+
+
+
+
+
+
+
+````
+
+````
+
+
+Read [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/Login.jsx)
+
+I’ve got the backend reset endpoints in place; I’m refining the flow so the reset token is actually used end-to-end in the frontend instead of only creating a placeholder message.
+
+
+
+
+
+
+````
+
+````
+
+
+Checked [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/App.jsx), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/Login.jsx), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/ForgotPassword.jsx), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/client/src/pages/ResetPassword.jsx), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/server/controllers/authController.js), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/server/routes/authRoutes.js), [](file:///c%3A/Users/p_corri/Soen_341/SOEN-341-Project-Team-3/job-platform/server/models/User.js), no problems found
+
+Implemented a proper reset-password flow end-to-end.
+
+Added:
+- Backend routes:
+  - `POST /api/auth/forgot-password`
+  - `POST /api/auth/reset-password`
+- User schema fields:
+  - `resetPasswordToken`
+  - `resetPasswordExpires`
+- Frontend pages:
+  - `ForgotPassword.jsx`
+  - `ResetPassword.jsx`
+- App route registration in App.jsx
+- Login link updated to use the real reset flow
+
+Behavior:
+- User enters email on the forgot-password page
+- Server creates a reset token and stores it on the user
+- User can continue to `/reset-password?token=...`
+- User enters a new password to complete the reset
+
+Files changed:
+- User.js
+- authController.js
+- authRoutes.js
+- App.jsx
+- ForgotPassword.jsx
+- ResetPassword.jsx
+- Login.jsx
+
+I also validated the edited files with the workspace diagnostics, and they report no errors.
+
+If you want, I can next make the reset flow more production-ready by sending the token via email instead of returning it directly in the API response.
+
+Made changes.
