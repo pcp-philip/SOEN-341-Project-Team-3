@@ -256,6 +256,7 @@ export default function ApplicantDashboard() {
                                                     job.location,
                                                     job.remote && "Remote",
                                                     job.type,
+                                                    job.resumeRequired !== false && "CV required",
                                                 ]
                                                     .filter(Boolean)
                                                     .join(" · ")}
