@@ -64,6 +64,8 @@ export const applyToJob = async (req, res) => {
     });
     await notify({ recipient: job.recruiter, type: "new_application", title: "New job application",
       message: `A candidate applied to ${job.title}.`, job: job._id, application: application._id });
+    await notify({ recipient: req.user._id, type: "status_update", title: "Application submitted",
+      message: `Your application for ${job.title} was submitted successfully.`, job: job._id, application: application._id });
     res.status(201).json({ application });
   } catch (err) {
     if (err.code === 11000)

@@ -4,7 +4,10 @@ import { generateDeadlineReminders } from "../services/notificationService.js";
 
 export async function listNotifications(req, res) {
   try {
-    if ((req.user.role || "applicant") === "applicant") await generateDeadlineReminders(req.user._id);
+    if ((req.user.role || "applicant") === "applicant") {
+      try { await generateDeadlineReminders(req.user._id); }
+      catch (error) { console.error("Deadline reminder generation failed:", error); }
+    }
     const recipient = req.user._id;
     const [notifications, unreadCount] = await Promise.all([
       Notification.find({ recipient }).sort({ createdAt: -1 }).limit(50).lean(),

@@ -87,7 +87,7 @@ export function computeApplicantAnalytics(
 
   // ---- status breakdown ----
   const byStatus = Object.fromEntries(APPLICATION_STATUSES.map((s) => [s, 0]));
-  for (const a of list) if (a.status in byStatus) byStatus[a.status] += 1;
+  for (const a of list) if (Object.hasOwn(byStatus, a.status)) byStatus[a.status] += 1;
   const sum = (statuses) => statuses.reduce((n, s) => n + byStatus[s], 0);
 
   const total = list.length;
@@ -109,7 +109,7 @@ export function computeApplicantAnalytics(
   for (const a of list) {
     const t = new Date(a.createdAt);
     const ms = t.getTime();
-    if (!Number.isFinite(ms)) continue; // no usable date: counted in total only
+    if (a.createdAt == null || !Number.isFinite(ms) || ms > nowMs) continue; // invalid or future dates count only in totals
 
     const age = nowMs - ms;
     if (age >= 0 && age < 7 * DAY_MS) last7Days += 1;

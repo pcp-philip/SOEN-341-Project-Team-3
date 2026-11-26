@@ -19,7 +19,10 @@ const TIME_ZONE = (() => {
 })();
 
 const dateFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
-const formatDate = (d) => dateFmt.format(new Date(d));
+const formatDate = (d) => {
+    const date = new Date(d);
+    return d == null || !Number.isFinite(date.getTime()) ? "Unknown date" : dateFmt.format(date);
+};
 const percent = (r) => (r == null ? "–" : `${Math.round(r * 100)}%`);
 
 const card = "bg-white rounded-xl shadow-sm border border-gray-100 p-5";
@@ -99,7 +102,7 @@ export default function Analytics() {
 
     const counts = useMemo(() => {
         const c = Object.fromEntries(STATUS_ORDER.map((s) => [s, 0]));
-        for (const a of applications) if (a.status in c) c[a.status] += 1;
+        for (const a of applications) if (Object.hasOwn(c, a.status)) c[a.status] += 1;
         return c;
     }, [applications]);
 
@@ -178,9 +181,9 @@ export default function Analytics() {
                                 hint={`${stats.responded} of ${stats.total} heard back`}
                             />
                             <StatCard
-                                label="Interviews"
+                                label="Interview stage"
                                 value={stats.interviews}
-                                hint={`${percent(stats.interviewRate)} of applications · ${stats.offers} hired`}
+                                hint={`${percent(stats.interviewRate)} currently shortlisted or hired · ${stats.offers} hired`}
                             />
                         </section>
 

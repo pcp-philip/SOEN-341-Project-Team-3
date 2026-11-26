@@ -265,3 +265,19 @@ test("analytics route requires login and the applicant role", () => {
   role({ user: { role: "applicant" } }, mockRes(), () => { nextCalled = true; });
   assert.equal(nextCalled, true);
 });
+
+for (const interval of ["week", "month"]) {
+  test(`future dates in the current ${interval} do not inflate activity`, () => {
+    const r = computeApplicantAnalytics([app("submitted", "2026-11-14T18:00:00Z"), app("reviewing", "2026-11-14T16:00:00Z")], { now: NOW, interval });
+    assert.equal(r.total, 2);
+    assert.equal(r.overTime.buckets.at(-1).count, 1);
+    assert.equal(r.lastAppliedAt, "2026-11-14T16:00:00.000Z");
+    assert.equal(r.last7Days, 1);
+  });
+}
+test("missing dates and inherited status names cannot corrupt analytics", () => {
+  const r = computeApplicantAnalytics([{ status: "constructor", createdAt: null }, { status: "submitted", createdAt: "invalid" }], { now: NOW });
+  assert.equal(r.byStatus.submitted, 1);
+  assert.equal(Object.hasOwn(r.byStatus, "constructor"), false);
+  assert.equal(r.firstAppliedAt, null);
+});
