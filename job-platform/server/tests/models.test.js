@@ -14,3 +14,15 @@ test('apply rejects malformed/missing job and expired deadline',async()=>{let re
 test('deadline exactly in future allows application and passes cover letter',async()=>{JobPosting.findOne=async()=>({_id:id,deadline:new Date(Date.now()+60000)});let data;Application.create=async d=>(data=d,{_id:'app'});Notification.create=async()=>{};const res=mockRes();await applyToJob({params:{id},user:{_id:'u1',resume:{filename:'resume.pdf'}},body:{coverLetter:'Hi'}},res);assert.equal(res.statusCode,201);assert.equal(data.coverLetter,'Hi');});
 test('duplicate application maps Mongo unique error to 409',async()=>{JobPosting.findOne=async()=>({_id:id,resumeRequired:false});Application.create=async()=>{const e=new Error('dup');e.code=11000;throw e};const res=mockRes();await applyToJob({params:{id},user:{_id:'u1'},body:{}},res);assert.equal(res.statusCode,409);});
 test('unexpected application error returns 500',async()=>{JobPosting.findOne=async()=>({_id:id,resumeRequired:false});Application.create=async()=>{throw new Error('db down')};const res=mockRes();await applyToJob({params:{id},user:{_id:'u1'},body:{}},res);assert.equal(res.statusCode,500);});
+
+test('successful application notifies both applicant and recruiter', async () => {
+  JobPosting.findOne = async () => ({ _id: id, recruiter: 'recruiter', title: 'Developer', resumeRequired: false });
+  Application.create = async () => ({ _id: 'app' });
+  const notices = [];
+  Notification.create = async data => notices.push(data);
+  const res = mockRes();
+  await applyToJob({ params: { id }, user: { _id: 'applicant' }, body: {} }, res);
+  assert.equal(res.statusCode, 201);
+  assert.deepEqual(notices.map(n => [n.recipient, n.type]), [['recruiter', 'new_application'], ['applicant', 'status_update']]);
+  assert.ok(notices.every(n => n.application === 'app'));
+});

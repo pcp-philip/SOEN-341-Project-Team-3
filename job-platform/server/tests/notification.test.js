@@ -2,17 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import Notification from "../models/Notification.js";
 import { listNotifications, markRead, markAllRead } from "../controllers/notificationController.js";
-import { notify } from "../services/notificationService.js";
+import Application from "../models/Application.js";
+import { notify, generateDeadlineReminders } from "../services/notificationService.js";
 import { mockRes } from "./helpers.js";
 
 const id = "507f1f77bcf86cd799439011";
 const other = "507f191e810c19729de860ea";
+const originalApplicationFind = Application.find;
 const originals = {
   find: Notification.find, count: Notification.countDocuments,
   one: Notification.findOneAndUpdate, many: Notification.updateMany,
   create: Notification.create, upsert: Notification.updateOne,
 };
 test.afterEach(() => {
+  Application.find = originalApplicationFind;
   Notification.find = originals.find;
   Notification.countDocuments = originals.count;
   Notification.findOneAndUpdate = originals.one;
@@ -68,4 +71,32 @@ test("regular notifications create a new record", async () => {
   Notification.create = async (data) => { created = data; };
   await notify({ recipient: id, type: "status_update", title: "Updated", message: "Reviewing" });
   assert.equal(created.type, "status_update");
+});
+
+test("deadline reminders query active applications and the next 48 hours", async () => {
+  const now = new Date("2026-11-25T12:00:00Z");
+  const deadline = new Date("2026-11-27T12:00:00Z");
+  const writes = [];
+  Application.find = (filter) => {
+    assert.deepEqual(filter, { applicant: id, status: { $in: ["submitted", "reviewing", "shortlisted"] } });
+    return { populate: async (options) => {
+      assert.deepEqual(options.match, { status: "open", deadline: { $gt: now, $lte: deadline } });
+      return [{ _id: other, job: { _id: id, title: "Developer", deadline } }, { job: null }];
+    } };
+  };
+  Notification.updateOne = async (filter, update, options) => writes.push({ filter, update, options });
+  await generateDeadlineReminders(id, now);
+  assert.equal(writes.length, 1);
+  assert.equal(writes[0].filter.dedupeKey, `deadline:${id}:${deadline.toISOString()}`);
+  assert.equal(writes[0].update.$setOnInsert.application, other);
+  assert.equal(writes[0].options.upsert, true);
+});
+test("reminder query failure does not hide existing notifications", async () => {
+  Application.find = () => { throw new Error("Unavailable"); };
+  Notification.find = () => ({ sort: () => ({ limit: () => ({ lean: async () => [{ title: "Existing" }] }) }) });
+  Notification.countDocuments = async () => 1;
+  const res = mockRes();
+  await listNotifications({ user: { _id: id, role: "applicant" } }, res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.unreadCount, 1);
 });

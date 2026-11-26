@@ -16,7 +16,7 @@ export async function notify(data) {
 
 export async function generateDeadlineReminders(userId, now = new Date()) {
   const until = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-  const applications = await Application.find({ applicant: userId })
+  const applications = await Application.find({ applicant: userId, status: { $in: ["submitted", "reviewing", "shortlisted"] } })
     .populate({ path: "job", match: { status: "open", deadline: { $gt: now, $lte: until } }, select: "title deadline" });
   for (const application of applications) {
     if (!application.job) continue;
