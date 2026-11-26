@@ -15,10 +15,17 @@ export default function ApplicantDashboard() {
     const [uploading, setUploading] = useState(false);
     const [deleting, setDeleting] = useState(false);
 
-    // AI suggestions
+    // AI suggestions (resume review)
     const [suggestions, setSuggestions] = useState(null);
     const [aiLoading, setAiLoading] = useState(false);
     const [aiError, setAiError] = useState("");
+
+    // AI job matches (separate from resume review)
+    const [matches, setMatches] = useState(null);
+    const [matchesLoading, setMatchesLoading] = useState(false);
+    const [matchesError, setMatchesError] = useState("");
+    const [applyingMatchId, setApplyingMatchId] = useState(null);
+    const [matchCoverLetter, setMatchCoverLetter] = useState("");
 
     // jobs
     const [jobs, setJobs] = useState([]);
@@ -81,9 +88,11 @@ export default function ApplicantDashboard() {
             setUser({ ...user, resume: res.data.resume });
             setResumeMsg("Resume uploaded ✅");
             setFile(null);
-            // Clear stale suggestions from the previous version
+            // Clear stale suggestions & matches from the previous resume
             setSuggestions(null);
             setAiError("");
+            setMatches(null);
+            setMatchesError("");
         } catch (err) {
             setResumeMsg(err.response?.data?.message || "Upload failed");
         } finally {
@@ -111,6 +120,8 @@ export default function ApplicantDashboard() {
             setResumeMsg("Resume deleted");
             setSuggestions(null);
             setAiError("");
+            setMatches(null);
+            setMatchesError("");
         } catch (err) {
             setResumeMsg(err.response?.data?.message || "Delete failed");
         } finally {
@@ -136,6 +147,39 @@ export default function ApplicantDashboard() {
             );
         } finally {
             setAiLoading(false);
+        }
+    };
+
+    const onGetJobMatches = async () => {
+        setMatchesLoading(true);
+        setMatchesError("");
+        setMatches(null);
+        try {
+            const res = await api.get("/resume/job-matches", { timeout: 90000 });
+            setMatches(res.data);
+        } catch (err) {
+            console.error("Job match error:", err);
+            setMatchesError(
+                err.response?.data?.message ||
+                err.message ||
+                "Could not get job matches. Check the server console."
+            );
+        } finally {
+            setMatchesLoading(false);
+        }
+    };
+
+    const onApplyFromMatch = async (jobId) => {
+        setJobMsg("");
+        try {
+            await api.post(`/jobs/${jobId}/apply`, { coverLetter: matchCoverLetter });
+            await loadApplications();
+            setJobMsg("Application sent ✅");
+            setApplyingMatchId(null);
+            setMatchCoverLetter("");
+            onGetJobMatches(); // refresh so applied job disappears
+        } catch (err) {
+            setJobMsg(err.response?.data?.message || "Could not apply");
         }
     };
 
@@ -264,7 +308,7 @@ export default function ApplicantDashboard() {
 
                     {resumeMsg && <p className="mt-3 text-sm">{resumeMsg}</p>}
 
-                    {/* AI Suggestions */}
+                    {/* AI Resume Review */}
                     {user?.resume && (
                         <div className="mt-5 border-t border-gray-100 pt-4">
                             <div className="flex items-center gap-3 flex-wrap">
@@ -371,6 +415,149 @@ export default function ApplicantDashboard() {
                         </div>
                     )}
                 </section>
+
+                {/* AI Job Matches */}
+                {user?.resume && (
+                    <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div className="flex flex-wrap items-center gap-3 mb-2">
+                            <h2 className="font-semibold">🎯 AI job matches</h2>
+                            <button
+                                type="button"
+                                onClick={onGetJobMatches}
+                                disabled={matchesLoading}
+                                className="bg-purple-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {matchesLoading ? "Matching…" : "Find jobs for me"}
+                            </button>
+                            <span className="text-xs text-gray-500">
+                                We compare your resume to open jobs and rank the best fits.
+                            </span>
+                        </div>
+
+                        {matchesError && (
+                            <p className="mt-2 text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200">
+                                {matchesError}
+                            </p>
+                        )}
+
+                        {matches?.profileSummary && (
+                            <p className="mt-3 text-sm italic text-gray-600">
+                                {matches.profileSummary}
+                            </p>
+                        )}
+
+                        {matches && matches.matches?.length === 0 && !matchesLoading && (
+                            <p className="mt-3 text-sm text-gray-500">
+                                No open jobs to match right now.
+                            </p>
+                        )}
+
+                        {matches?.matches?.length > 0 && (
+                            <ul className="mt-4 space-y-4">
+                                {matches.matches.map(
+                                    ({ job, score, matchedSkills, missingSkills, reason }) => (
+                                        <li key={job._id} className="border rounded-lg p-4">
+                                            <div className="flex justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <h3 className="font-semibold">{job.title}</h3>
+                                                    <p className="text-xs text-gray-500">
+                                                        {[
+                                                            job.company,
+                                                            job.location || (job.remote && "Remote"),
+                                                            job.type,
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(" · ")}
+                                                    </p>
+                                                </div>
+                                                <span
+                                                    className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-bold ${scoreColor(
+                                                        score
+                                                    )}`}
+                                                >
+                                                    {score}% match
+                                                </span>
+                                            </div>
+
+                                            {reason && <p className="mt-2 text-sm">{reason}</p>}
+
+                                            {matchedSkills?.length > 0 && (
+                                                <div className="mt-2 flex flex-wrap gap-1 text-xs">
+                                                    {matchedSkills.map((s, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className="bg-green-50 text-green-700 px-2 py-0.5 rounded"
+                                                        >
+                                                            ✓ {s}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {missingSkills?.length > 0 && (
+                                                <div className="mt-1 flex flex-wrap gap-1 text-xs">
+                                                    {missingSkills.map((s, i) => (
+                                                        <span
+                                                            key={i}
+                                                            className="bg-orange-50 text-orange-700 px-2 py-0.5 rounded"
+                                                        >
+                                                            ⚠ {s}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            <div className="mt-3">
+                                                {applyingMatchId === job._id ? (
+                                                    <div className="space-y-2">
+                                                        <textarea
+                                                            value={matchCoverLetter}
+                                                            onChange={(e) =>
+                                                                setMatchCoverLetter(e.target.value)
+                                                            }
+                                                            placeholder="Cover letter (optional)"
+                                                            rows={3}
+                                                            className="w-full border p-2 rounded text-sm"
+                                                        />
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() =>
+                                                                    onApplyFromMatch(job._id)
+                                                                }
+                                                                className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700"
+                                                            >
+                                                                Send application
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    setApplyingMatchId(null);
+                                                                    setMatchCoverLetter("");
+                                                                }}
+                                                                className="px-4 py-2 rounded text-sm border"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => {
+                                                            setApplyingMatchId(job._id);
+                                                            setMatchCoverLetter("");
+                                                        }}
+                                                        className="text-sm text-blue-600 hover:underline"
+                                                    >
+                                                        Apply
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </li>
+                                    )
+                                )}
+                            </ul>
+                        )}
+                    </section>
+                )}
 
                 {/* Jobs */}
                 <section className="bg-white rounded-xl shadow-sm border border-gray-100">
